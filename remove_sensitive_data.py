@@ -8,11 +8,11 @@ def remove_name_and_address(text):
 
 def anonymize_phone(text):
     pattern = r"\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
-    return re.sub(pattern, "[phone redacted]", text)
+    return re.sub(pattern, "phone", text)
 
 def anonymize_email(text):
     pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
-    return re.sub(pattern, "[email redacted]", text)
+    return re.sub(pattern, "email", text)
 
 def anonymize_dates(text):
     pattern = (
