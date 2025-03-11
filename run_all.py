@@ -5,7 +5,8 @@ files = [
     "DOB_and_Medical_Number_Removal.py",
     "Data_Anonymizer_GUI.py",
     "remove_sensitive_data.py",
-    "Email_Removal.py"
+    "Email_Removal.py",
+    "Phone_Number_Removal.py"
 ]
 
 for file in files:
