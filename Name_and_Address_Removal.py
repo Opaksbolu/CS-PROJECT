@@ -23,27 +23,36 @@ def extract_name_and_address(text):
 
     return name, address
 
-def remove_extracted_lines(text):
+def anonymize_text(text, name, address):
     """
-    Removes lines that contain the extracted name or address information.
-    
-    This function removes any line that starts with "Patient:" or "Name:" 
-    and any line that starts with "Address:".
+    Replaces the extracted name and address in the text with placeholders 
+    and anonymizes any occurrences of the extracted name.
     
     Parameters:
         text (str): The input text.
+        name (str): The extracted name to replace.
+        address (str): The extracted address to replace.
         
     Returns:
-        str: The text with the specified lines removed.
+        str: The text with name and address anonymized.
     """
-    # Remove lines starting with "Patient:" or "Name:"
-    text_without_name = re.sub(r"^(?:Patient|Name)\s*:\s*.+$", "", text, flags=re.IGNORECASE | re.MULTILINE)
-    # Remove lines starting with "Address:"
-    text_cleaned = re.sub(r"^Address\s*:\s*.+$", "", text_without_name, flags=re.IGNORECASE | re.MULTILINE)
-    
-    # Optionally, remove extra blank lines that might have been created
-    text_cleaned = "\n".join([line for line in text_cleaned.splitlines() if line.strip() != ""])
-    return text_cleaned
+    # Replace the name and address lines with placeholders
+    text = re.sub(r"^(?:Patient|Name)\s*:\s*.+$", "Name: [REDACTED]", text, flags=re.IGNORECASE | re.MULTILINE)
+    text = re.sub(r"^Address\s*:\s*.+$", "Address: [REDACTED]", text, flags=re.IGNORECASE | re.MULTILINE)
+
+    # Anonymize occurrences of the extracted name in the text (if found)
+    if name:
+        first_name = name.split()[0]  # Extract first name
+        last_name = name.split()[-1]  # Extract last name
+        name_variants = [re.escape(name), re.escape(first_name), re.escape(last_name), rf"Mr\.?\s*{re.escape(last_name)}"]
+
+        # Create a regex pattern that matches any variant of the name
+        name_pattern = r"\b(" + "|".join(name_variants) + r")\b"
+
+        # Replace all occurrences with "[REDACTED]"
+        text = re.sub(name_pattern, "[REDACTED]", text, flags=re.IGNORECASE)
+
+    return text
 
 def main():
     print("Please paste your document text. Enter a blank line to finish:")
@@ -75,10 +84,10 @@ def main():
     else:
         print("Address not found in the document.")
     
-    # Remove the lines containing name and address from the text
-    modified_text = remove_extracted_lines(text)
+    # Replace name and address with placeholders and anonymize name occurrences
+    modified_text = anonymize_text(text, name, address)
     
-    print("\n--- Modified Text (Name and Address lines removed) ---")
+    print("\n--- Modified Text (Name and Address Anonymized) ---")
     print(modified_text)
 
 if __name__ == "__main__":
