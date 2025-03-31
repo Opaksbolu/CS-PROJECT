@@ -1,0 +1,128 @@
+--- Record 1 --- (Name: Johnathan Smith)
+Date of Birth: dob
+Medical Record Number: medical number
+Date of Visit: 10/26/2023
+Phone: phone
+email: email
+Provider: Dr. Eleanor Vance, MD
+Chief Complaint: "Persistent cough and shortness of breath for the past week."
+History of Present Illness (HPI):
+Mr. Smith presents to the clinic with a one-week history of a dry, hacking cough and progressive shortness of breath. He reports the cough began insidiously, initially mild, but has worsened over the past three days. He denies fever, chills, or night sweats. He describes the shortness of breath as a feeling of tightness in his chest, exacerbated by exertion. He has noticed a decrease in his exercise tolerance. He denies any recent travel or known exposures to sick individuals. He has tried over-the-counter cough suppressants with minimal relief.
+Past Medical History (PMH):
+Asthma (diagnosed in childhood)
+Seasonal allergies
+No known surgical history
+Medications:
+Albuterol inhaler (as needed)
+Fluticasone nasal spray (daily)
+Allergies:
+Penicillin (rash)
+Family History:
+Mother: Hypertension, type 2 diabetes
+Father: Coronary artery disease
+Social History:
+Non-smoker
+Occasional alcohol consumption (1-2 drinks per week)
+Works as a software engineer
+Reports moderate stress levels due to work deadlines
+Review of Systems (ROS):
+Constitutional: Denies fever, chills, fatigue, or weight loss.
+Respiratory: Positive for cough and shortness of breath. Denies hemoptysis or wheezing.
+Cardiovascular: Denies chest pain, palpitations, or edema.
+Gastrointestinal: Denies nausea, vomiting, or abdominal pain.
+Neurological: Denies headache, dizziness, or weakness.
+Physical Examination:
+General: Alert and oriented, appears uncomfortable due to respiratory distress.
+Vital Signs:
+Blood pressure: 130/80 mmHg
+Heart rate: 90 bpm
+Respiratory rate: 22 breaths/min
+Oxygen saturation: 92% on room air
+Temperature: 98.6°F (37°C)
+Respiratory: Diminished breath sounds bilaterally, with scattered wheezing.
+Cardiovascular: Regular heart rate and rhythm, no murmurs.
+Abdomen: Soft, non-tender.
+Extremities: No edema.
+Assessment:
+Acute exacerbation of asthma
+Possible bronchitis
+Plan:
+Administered nebulized albuterol in clinic.
+Prescribed prednisone 40mg daily for 5 days.
+Prescribed inhaled corticosteroid (fluticasone/salmeterol) twice daily.
+Ordered chest X-ray to rule out pneumonia.
+Instructed patient to monitor symptoms and return to clinic if symptoms worsen.
+Patient education provided on proper inhaler technique and asthma action plan.
+Chest X-Ray Report (10/26/2023):
+Mild hyperinflation of the lungs.
+No evidence of pneumonia or other acute pulmonary process.
+Follow-up Appointment:
+Scheduled for 11/02/2023.
+Provider Notes:
+Patient responded well to nebulized albuterol in clinic. Patient was given clear instructions on medication usage and when to return to clinic. Patient understands the return instructions.
+11/02/2023 (Follow-up):
+Patient reports significant improvement in cough and shortness of breath. Reports using inhaler as instructed. Examination shows improved breath sounds, minimal wheezing. Continue current medication regimen. Re-evaluate in 1 month.
+
+
+--- Record 2 --- (Name: Michael Johnson)
+Date of Birth: dob
+Medical Record Number: medical number
+Date of Visit: 11/12/2023
+Phone: phone
+email: email
+Provider: Dr. Rebecca Holt, MD
+Chief Complaint: "Chest pain and shortness of breath for two days."
+History of Present Illness (HPI):
+Mr. Johnson presents with a two-day history of intermittent, sharp chest pain that radiates to his left arm. He reports that the pain intensifies with physical exertion and is partially relieved by rest. He also mentions experiencing shortness of breath and lightheadedness. He denies fever, cough, or recent trauma. The patient has a history of hypertension and hyperlipidemia.
+Past Medical History (PMH):
+- Hypertension
+- Hyperlipidemia
+- Type 2 Diabetes Mellitus (diagnosed in 2015)
+Medications:
+- Lisinopril 20mg once daily
+- Atorvastatin 40mg once daily
+- Metformin 500mg twice daily
+Allergies:
+None known
+Family History:
+- Mother: History of breast cancer (survived)
+- Father: Coronary artery disease
+Social History:
+- Former smoker (quit 5 years ago)
+- Occasional alcohol consumption
+- Works as an accountant
+- Leads a mostly sedentary lifestyle
+Review of Systems (ROS):
+Constitutional: Denies fever, chills, or weight loss.
+Cardiovascular: Reports chest pain; denies palpitations.
+Respiratory: Denies cough or wheezing.
+Gastrointestinal: Denies nausea, vomiting, or abdominal pain.
+Neurological: Denies headaches or dizziness.
+Physical Examination:
+General: Patient is alert, oriented, and appears mildly anxious.
+Vital Signs:
+  - Blood Pressure: 145/90 mmHg
+  - Heart Rate: 95 bpm
+  - Respiratory Rate: 20 breaths/min
+  - Oxygen Saturation: 96% on room air
+  - Temperature: 98.4°F (36.9°C)
+Cardiovascular: Regular rhythm; S1 and S2 are normal; no murmurs.
+Respiratory: Lungs are clear to auscultation bilaterally.
+Abdomen: Soft and non-tender.
+Extremities: No edema noted.
+Assessment:
+- Suspected unstable angina vs. early myocardial infarction
+- Uncontrolled hypertension
+- Hyperlipidemia
+Plan:
+- Admit for cardiac monitoring and further evaluation.
+- Obtain ECG and cardiac enzyme tests.
+- Adjust antihypertensive medications.
+- Consult cardiology.
+- Provide patient education regarding lifestyle modifications and medication adherence.
+- Arrange follow-up pending test results.
+Provider Notes:
+Patient tolerated the initial evaluation well. ECG shows nonspecific ST segment changes; lab tests for troponin are pending. The patient was counseled regarding risk factors and the importance of follow-up care.
+Follow-up Appointment:
+Scheduled for 11/15/2023 with Cardiology.
+
