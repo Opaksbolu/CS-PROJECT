@@ -18,10 +18,11 @@ def extract_name_and_address(text):
 
     return name, address
 
+# Updated: Instead of replacing the line with "Patient: Emily", we now capture and replace with only the extracted full name.
 def remove_extracted_lines(text):
     text_without_name = re.sub(
-        r"^(?:Patient|Name)\s*:\s*.+$",
-        "",
+        r"^(?:Patient|Name)\s*:\s*(.+)$",
+        lambda m: m.group(1).strip(),  # Return only the captured full name
         text,
         flags=re.IGNORECASE | re.MULTILINE
     )
@@ -35,8 +36,8 @@ def remove_extracted_lines(text):
     text_cleaned = "\n".join([line for line in text_cleaned.splitlines() if line.strip() != ""])
     return text_cleaned
 
+# If you need to anonymize DOB, this function remains intact.
 def anonymize_dob(text):
-    # This function remains intact, but we won't call it anymore
     dob_pattern = (
         r"\b\d{1,2}/\d{1,2}/\d{4}\b"
         r"|\b\d{4}-\d{2}-\d{2}\b"
@@ -51,41 +52,30 @@ def anonymize_medical_number(text):
     return re.sub(r"\b\d{7}\b", "medical number", text)
 
 def anonymize_phone(text):
-    # This function remains, but we won't call it anymore
     pattern = r"\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
     return re.sub(pattern, "phone", text)
 
 def anonymize_email(text):
-    # This function remains, but we won't call it anymore
     pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
     return re.sub(pattern, "email", text)
 
+# Updated: No longer overriding any extracted name with "Emily". Returns the extracted full name.
 def process_single_record(record):
     """
     Process one 'database entry' or 'record':
       - Extract name, address
-      - Remove name/address lines
+      - Remove name/address lines (now replacing the patient name line with the full name only)
       - Anonymize *some fields*
     Returns (extracted_name, extracted_address, anonymized_text).
     """
     name, address = extract_name_and_address(record)
     cleaned = remove_extracted_lines(record)
-
-    # -- The user specifically wants DOB, phone, email to be visible,
-    #    so we do NOT call anonymize_dob, anonymize_phone, or anonymize_email. --
-    # cleaned = anonymize_dob(cleaned)       # <== COMMENTED OUT
+    # The user specifically wants DOB, phone, email to be visible,
+    # so we do NOT call anonymize_dob, anonymize_phone, or anonymize_email.
     cleaned = anonymize_medical_number(cleaned)
-    # cleaned = anonymize_phone(cleaned)     # <== COMMENTED OUT
-    # cleaned = anonymize_email(cleaned)     # <== COMMENTED OUT
-
     return name, address, cleaned
 
 def process_all_records(full_text):
-    """
-    Splits the text on each 'Patient:' line (ignoring case).
-    This ensures that everything for ONE patient stays together.
-    If there's only one 'Patient:' line, you'll only get one record.
-    """
     chunks = re.split(r"(?i)(?=^\s*Patient\s*:\s*)", full_text.strip(), flags=re.MULTILINE)
     if len(chunks) <= 1 and (not chunks or not re.match(r"(?i)^\s*Patient\s*:\s*", chunks[0])):
         if not full_text.strip():
@@ -118,11 +108,6 @@ def upload_file():
             messagebox.showerror("Error", f"Could not read file: {e}")
 
 def extract_all_phi_items(text):
-    """
-    Scan the given text for all 18 HIPAA-related items.
-    Returns a dictionary { "Dates": [...], "Phone Numbers": [...], etc. }
-    If an item is not found, it will have an empty list.
-    """
     results = {
         "Dates": [],
         "Phone Numbers": [],
@@ -142,7 +127,6 @@ def extract_all_phi_items(text):
         "Unique Identifying Codes": [],
     }
 
-    # 3) Dates
     date_pattern = (
         r"\b\d{1,2}/\d{1,2}/\d{4}\b"
         r"|\b\d{4}-\d{2}-\d{2}\b"
@@ -150,64 +134,49 @@ def extract_all_phi_items(text):
     )
     results["Dates"] = re.findall(date_pattern, text)
 
-    # 4) Phone numbers
     phone_pattern = r"\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
     results["Phone Numbers"] = re.findall(phone_pattern, text)
 
-    # 5) Fax numbers
     fax_pattern = r"(?i)\bFax(?:\s*number| no\.?)?\s*[:\-]?\s*(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
     results["Fax Numbers"] = re.findall(fax_pattern, text)
 
-    # 6) Email addresses
     email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
     results["Email Addresses"] = re.findall(email_pattern, text)
 
-    # 7) SSNs
     ssn_pattern = r"\b\d{3}-\d{2}-\d{4}\b"
     results["SSNs"] = re.findall(ssn_pattern, text)
 
-    # 8) Medical record numbers
     med_rec_pattern_line = r"(?i)\bMedical record number\s*:\s*([^\n]+)"
     line_matches = re.findall(med_rec_pattern_line, text)
     results["Medical Record Numbers"].extend(line_matches)
 
-    # 9) Health plan beneficiary numbers
     hpbn_pattern = r"(?i)\bHealth plan beneficiary number\s*:\s*([^\n]+)"
     results["Health Plan Beneficiary Numbers"] = re.findall(hpbn_pattern, text)
 
-    # 10) Account numbers
     account_pattern = r"(?i)\bAccount\s*:\s*([^\n]+)"
     results["Account Numbers"] = re.findall(account_pattern, text)
 
-    # 11) Certificate/license numbers
     cert_lic_pattern = r"(?i)\b(?:license|certificate)\s*number\s*:\s*([^\n]+)"
     results["Certificate/License Numbers"] = re.findall(cert_lic_pattern, text)
 
-    # 12) Serial numbers
     serial_pattern = r"(?i)\bserial numbers?\s*:\s*([^\n]+)"
     results["Serial Numbers"] = re.findall(serial_pattern, text)
 
-    # 13) Device identifiers
     device_pattern = r"(?i)\bDevice identifier\s*:\s*([^\n]+)"
     results["Device Identifiers"] = re.findall(device_pattern, text)
 
-    # 14) URLs
     url_pattern = r"(?i)\b(?:https?://\S+|www\.\S+)\b"
     results["URLs"] = re.findall(url_pattern, text)
 
-    # 15) IP addresses
     ip_pattern = r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
     results["IP Addresses"] = re.findall(ip_pattern, text)
 
-    # 16) Biometric identifiers
     bio_pattern = r"(?i)\bBiometric\s*:\s*([^\n]+)"
     results["Biometric Identifiers"] = re.findall(bio_pattern, text)
 
-    # 17) Full face photographic images
     ff_pattern = r"(?i)(full face photographic images?[^\n]*)"
     results["Full Face Photographic Images"] = re.findall(ff_pattern, text)
 
-    # 18) Unique identifying code
     code_pattern = r"(?i)\bCode\s*:\s*([^\n]+)"
     results["Unique Identifying Codes"] = re.findall(code_pattern, text)
 
@@ -237,17 +206,10 @@ def process_all_records_with_all_info(full_text):
     return results
 
 def my_process_all_records_both_notations(full_text):
-    """
-    Splits on EITHER 'Patient:' or 'Patient Name:' lines (case-insensitive),
-    isolates the patient portion (until 'Provider:' or 'Hospital name:'),
-    then calls your process_single_record_with_all_info(...) on that chunk.
-    Returns a list of (name, address, all_items, anonymized_text) for each patient.
-    """
     pattern = r"(?i)(?=^\s*(?:Patient\s*:\s*|Patient\s+Name\s*:\s*))"
     chunks = re.split(pattern, full_text.strip(), flags=re.MULTILINE)
 
     if len(chunks) <= 1 and (not chunks or not re.match(pattern, chunks[0])):
-        # If no "Patient:" or "Patient Name:" found, fallback to entire text
         if not full_text.strip():
             return []
         iso_chunk = isolate_patient_chunk(full_text.strip())
@@ -265,10 +227,6 @@ def my_process_all_records_both_notations(full_text):
     return results
 
 def process_gui():
-    """
-    (Unchanged)
-    We keep this but do not use it.
-    """
     full_text = text_input.get("1.0", tk.END).strip()
     if not full_text:
         messagebox.showerror("Error", "No text provided!")
@@ -349,13 +307,12 @@ def process_gui():
         text_box = scrolledtext.ScrolledText(record_frame, wrap=tk.WORD, width=70, height=10)
         text_box.insert(tk.END, anon_text)
         text_box.config(state=tk.DISABLED)
-        text_box.pack(fill="x", expand=True, pady=(0, 5))
+        text_box.pack(fill=tk.X, expand=True, pady=(0, 5))
 
 def isolate_patient_chunk(chunk):
     lines = chunk.splitlines()
     out_lines = []
     for line in lines:
-        # we break if we see "Provider:" or "Hospital name:"
         if re.match(r"(?i)^\s*(Provider|Hospital name)\s*:\s*", line):
             break
         out_lines.append(line)
@@ -458,7 +415,19 @@ def process_gui_patient_info_only():
         text_box = scrolledtext.ScrolledText(record_frame, wrap=tk.WORD, width=70, height=10)
         text_box.insert(tk.END, anon_text)
         text_box.config(state=tk.DISABLED)
-        text_box.pack(fill="x", expand=True, pady=(0, 5))
+        text_box.pack(fill=tk.X, expand=True, pady=(0, 5))
+
+# Updated: remove_name_and_address now replaces the patient line with just the full name.
+def remove_name_and_address(text):
+    text = re.sub(
+        r"^(?:Patient|Patient Name|Name)\s*:\s*(.+)$",
+        lambda m: m.group(1).strip(),
+        text,
+        flags=re.IGNORECASE | re.MULTILINE
+    )
+    text = re.sub(r"^Address\s*:\s*.+$", "", text, flags=re.IGNORECASE | re.MULTILINE)
+    text = "\n".join([line for line in text.splitlines() if line.strip() != ""])
+    return text
 
 # Helpers for full-text anonymization
 def anonymize_phone_all(text):
@@ -482,7 +451,6 @@ def anonymize_dates(text):
     for match in matches:
         start, end = match.span()
         new_text_parts.append(text[last_end:start])
-        # Keep the date visible by appending match.group(0)
         new_text_parts.append(match.group(0))
         last_end = end
         replaced_count += 1
@@ -492,18 +460,16 @@ def anonymize_dates(text):
 def anonymize_medical_number_all(text):
     return re.sub(r"\b\d{7}\b", "medical number", text)
 
+# Updated: Replace the patient name line with only the full name.
 def remove_name_and_address(text):
-    text = re.sub(r"^(?:Patient|Name)\s*:\s*.+$", "", text, flags=re.IGNORECASE | re.MULTILINE)
+    text = re.sub(r"^(?:Patient|Patient Name|Name)\s*:\s*(.+)$", lambda m: m.group(1).strip(), text, flags=re.IGNORECASE | re.MULTILINE)
     text = re.sub(r"^Address\s*:\s*.+$", "", text, flags=re.IGNORECASE | re.MULTILINE)
     text = "\n".join([line for line in text.splitlines() if line.strip() != ""])
     return text
 
 def anonymize_all(text):
-    # Keep the function, but comment out phone/email/date anonymization so user can see them.
     text = remove_name_and_address(text)
-    # text = anonymize_phone_all(text)
-    # text = anonymize_email_all(text)
-    # text = anonymize_dates(text)
+    text = re.sub(r"(?i)\bDate of Birth\b", "DOB", text)
     text = anonymize_medical_number_all(text)
     return text
 
@@ -527,7 +493,6 @@ def process_gui_patient_info_with_full_text():
         output_filename = "full_anonymized_output.txt"
         output_path = os.path.join(cache_folder, output_filename)
 
-        # Append mode so we don't overwrite previous runs:
         with open(output_path, "a", encoding="utf-8") as f:
             f.write("\n\n--- New run on {} ---\n".format(datetime.now()))
             f.write(anonymized_full_text)
@@ -576,15 +541,9 @@ def process_gui_patient_info_with_full_text():
         text_box = scrolledtext.ScrolledText(record_frame, wrap=tk.WORD, width=70, height=10)
         text_box.insert(tk.END, anonymized_full_text)
         text_box.config(state=tk.DISABLED)
-        text_box.pack(fill="x", expand=True, pady=(0, 5))
+        text_box.pack(fill=tk.X, expand=True, pady=(0, 5))
 
 def process_gui_extract_patient_info_one_file():
-    """
-    Splits text on 'Patient:' or 'Patient Name:' lines (both notations)
-    using our new 'my_process_all_records_both_notations' function.
-    For each chunk, extracts Name, Address, 18 HIPAA items,
-    then auto-saves them all in a single text file: "patient_info_extracted.txt"
-    """
     full_text = text_input.get("1.0", tk.END).strip()
     if not full_text:
         messagebox.showerror("Error", "No text provided!")
@@ -601,7 +560,6 @@ def process_gui_extract_patient_info_one_file():
         lines_to_save.append(f"Name: {name if name else 'Not Found'}")
         lines_to_save.append(f"Address: {address if address else 'Not Found'}")
 
-        # Show each of the 18 HIPAA keys if found
         relevant_keys = [
             "Dates",
             "Phone Numbers",
@@ -627,7 +585,7 @@ def process_gui_extract_patient_info_one_file():
             else:
                 lines_to_save.append(f"{key}: Not Found")
 
-        lines_to_save.append("")  # blank line
+        lines_to_save.append("")
 
     output_text = "\n".join(lines_to_save)
     try:
@@ -637,7 +595,6 @@ def process_gui_extract_patient_info_one_file():
         output_filename = "patient_info_extracted.txt"
         output_path = os.path.join(cache_folder, output_filename)
 
-        # We append instead of overwrite so we don't lose older runs.
         with open(output_path, "a", encoding="utf-8") as f:
             f.write("\n\n--- New run on {} ---\n".format(datetime.now()))
             f.write(output_text)
@@ -673,7 +630,6 @@ def run_Data_Anonymizer_GUI():
     upload_button = tk.Button(button_frame, text="Upload Text File", command=upload_file)
     upload_button.pack(side=tk.LEFT, padx=(0, 5), pady=5)
 
-    # "Process Text" => anonymize the full text with patient extraction (already appends entire file)
     process_button = tk.Button(
         button_frame,
         text="Process Text",
@@ -681,15 +637,6 @@ def run_Data_Anonymizer_GUI():
     )
     process_button.pack(side=tk.LEFT, padx=(0, 5), pady=5)
 
-    # (Comment out multiple-patients button – but do not delete function if it existed.)
-    # multi_button = tk.Button(
-    #     button_frame,
-    #     text="Process & Save Multiple Patients",
-    #     command=process_gui_save_multiple_patients
-    # )
-    # multi_button.pack(side=tk.LEFT, padx=(0, 5), pady=5)
-
-    # *** UPDATED: "Process Text (Patient OR Patient Name)" => now displays entire anonymized file. ***
     button_both = tk.Button(
         button_frame,
         text="Process Text (Patient OR Patient Name)",
@@ -712,37 +659,25 @@ def run_Data_Anonymizer_GUI():
     root.mainloop()
 
 def process_gui_both_patient_notations():
-    """
-    A new function that uses 'my_process_all_records_both_notations' to detect
-    'Patient:' or 'Patient Name:'. Then displays results in the same style.
-    
-    -- UPDATED so that the "Anonymized Text" area shows the entire anonymized file
-       rather than just the patient-chunk.
-    """
     full_text = text_input.get("1.0", tk.END).strip()
     if not full_text:
         messagebox.showerror("Error", "No text provided!")
         return
 
-    # We still do chunk-based extraction (for name/address/all_items). 
-    # But for the final "Anonymized Text," we'll use the entire anonymized file.
     all_results = my_process_all_records_both_notations(full_text)
 
     if not all_results:
         messagebox.showinfo("Info", "No records found or processed.")
         return
 
-    # Anonymize the entire text (instead of just a chunk)
     anonymized_full_text = anonymize_all(full_text)
 
-    # Build the combined text for the text file output (if you want to save it)
     combined_anonymized_text = []
     for i, (name, address, all_items, anon_text) in enumerate(all_results, start=1):
         record_header = f"--- Record {i} ---"
         if name:
             record_header += f" (Name: {name})"
         combined_anonymized_text.append(record_header)
-        # Instead of adding `anon_text`, add the full anonymized text:
         combined_anonymized_text.append(anonymized_full_text)
         combined_anonymized_text.append("\n")
 
@@ -755,7 +690,6 @@ def process_gui_both_patient_notations():
         output_filename = "anonymized_records_patientName.txt"
         output_path = os.path.join(cache_folder, output_filename)
 
-        # We'll open in append mode, just as we did before.
         with open(output_path, "a", encoding="utf-8") as f:
             f.write("\n\n--- New run on {} ---\n".format(datetime.now()))
             f.write(full_output_text)
@@ -766,7 +700,6 @@ def process_gui_both_patient_notations():
     except Exception as e:
         messagebox.showerror("Auto-Save Error", f"Could not automatically save results:\n{e}")
 
-    # Show it in a window:
     output_window = tk.Toplevel(root)
     output_window.title("Anonymized Output (Both Notations)")
 
@@ -781,7 +714,6 @@ def process_gui_both_patient_notations():
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    # We can still show the extracted info from each chunk, but for "Anonymized Text," we now show the entire file.
     for i, (name, address, all_items, anon_text) in enumerate(all_results, start=1):
         record_frame = tk.LabelFrame(scrollable_frame, text=f"Record {i}", padx=10, pady=10)
         record_frame.pack(fill="x", expand=True, padx=5, pady=5, anchor="nw")
@@ -806,14 +738,9 @@ def process_gui_both_patient_notations():
         info_label.pack(anchor="w", pady=(0, 5))
 
         text_box = scrolledtext.ScrolledText(record_frame, wrap=tk.WORD, width=70, height=10)
-        # Now show the entire anonymized file here instead of just the chunk.
         text_box.insert(tk.END, anonymized_full_text)
         text_box.config(state=tk.DISABLED)
-        text_box.pack(fill="x", expand=True, pady=(0, 5))
-
-# ================================
-# End Data_Anonymizer_GUI.py code
-# ================================
+        text_box.pack(fill=tk.X, expand=True, pady=(0, 5))
 
 def anonymize_dob_DOBRemoval(text):
     dob_pattern = r"\b\d{1,2}/\d{1,2}/\d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{1,2},\s\d{4}\b"
@@ -832,7 +759,7 @@ def remove_email(text):
     return re.sub(email_pattern, "email", text)
 
 def anonymize_text_NameAddress(text, name, address):
-    text = re.sub(r"^(?:Patient|Name)\s*:\s*.+$", "Name: [REDACTED]", text, flags=re.IGNORECASE | re.MULTILINE)
+    text = re.sub("Name: [REDACTED]", text, flags=re.IGNORECASE | re.MULTILINE)
     text = re.sub(r"^Address\s*:\s*.+$", "Address: [REDACTED]", text, flags=re.IGNORECASE | re.MULTILINE)
     if name:
         try:
