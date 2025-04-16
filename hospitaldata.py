@@ -546,7 +546,8 @@ def process_gui_patient_info_with_full_text():
     original_full_text = full_text  # The entire file text unmodified
     # Build an anonymized version of the ENTIRE text:
     anonymized_entire_text = re.sub(r"(?im)Name:\s*.*", "Name: [*name*]", original_full_text)
-    anonymized_entire_text = re.sub(r"(?im)DOB:\s*.*", "DOB: [*dob*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)(?:Date\s+of\s+Birth|DOB)\s*:\s*.*",
+    "Date of Birth: [*dob*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Address:\s*.*", "Address: [*address*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Phone:\s*.*", "Phone: [*phone*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Email:\s*.*", "Email: [*email*]", anonymized_entire_text)
