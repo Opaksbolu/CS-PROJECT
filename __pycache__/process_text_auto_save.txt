@@ -1,5 +1,5 @@
 --- Patient Record 1 ---
-Name: Emily Carter
+Emily Carter
 DOB: 11/05/1988
 Address: 789 Willow Lane, Apt 34, Brookfield, TX 75001
 Dates: 02/14/2024

@@ -478,7 +478,7 @@ def process_gui_patient_info_with_full_text():
     selected_fields_lines = []
     for i, (name, address, all_items, _) in enumerate(all_results, start=1):
         selected_fields_lines.append(f"--- Patient Record {i} ---")
-        selected_fields_lines.append(f"Name: {name if name else 'Not Found'}")
+        selected_fields_lines.append(name if name else 'Not Found')
         dob_value = all_items.get("DOB", [])
         if dob_value:
             selected_fields_lines.append(f"DOB: {dob_value[0]}")
@@ -545,12 +545,12 @@ def process_gui_patient_info_with_full_text():
     # 4) We want to let the user toggle the ENTIRE original text vs. an anonymized version
     original_full_text = full_text  # The entire file text unmodified
     # Build an anonymized version of the ENTIRE text:
-    anonymized_entire_text = re.sub(r"(?im)Name:\s*.*", "Name: [DEIDENTIFIED]", original_full_text)
-    anonymized_entire_text = re.sub(r"(?im)DOB:\s*.*", "DOB: [DEIDENTIFIED]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Address:\s*.*", "Address: [DEIDENTIFIED]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Phone:\s*.*", "Phone: [DEIDENTIFIED]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Email:\s*.*", "Email: [DEIDENTIFIED]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)SSN:\s*.*", "SSN: [DEIDENTIFIED]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Name:\s*.*", "Name: [*name*]", original_full_text)
+    anonymized_entire_text = re.sub(r"(?im)DOB:\s*.*", "DOB: [*dob*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Address:\s*.*", "Address: [*address*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Phone:\s*.*", "Phone: [*phone*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Email:\s*.*", "Email: [*email*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)SSN:\s*.*", "SSN: [*ssn*]", anonymized_entire_text)
     # ... etc. for other patterns you want to anonymize ...
 
     is_showing_selected_fields = True
@@ -592,6 +592,21 @@ def process_gui_patient_info_with_full_text():
     # 5) Single button for toggling
     deidentify_button = tk.Button(record_frame, text="Deidentify", command=on_deidentify_clicked)
     deidentify_button.pack(anchor="ne", pady=5)
+
+    # --- NEW: always restore the SELECTED‑FIELDS view ---
+    def on_reidentify_clicked():
+        nonlocal is_showing_selected_fields, is_deidentified
+        text_box.config(state=tk.NORMAL)
+        text_box.delete("1.0", tk.END)
+        text_box.insert(tk.END, selected_fields_text)
+        text_box.config(state=tk.DISABLED)
+        deidentify_button.config(text="Deidentify")
+        is_showing_selected_fields = True
+        is_deidentified = False
+
+    reidentify_button = tk.Button(record_frame, text="Reidentify", command=on_reidentify_clicked)
+    reidentify_button.pack(anchor="ne", pady=5)
+
 
 def remove_name_and_address_again(text):
     return re.sub(
