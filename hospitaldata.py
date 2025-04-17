@@ -132,8 +132,11 @@ def extract_all_phi_items(text):
     phone_pattern = r"\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
     results["Phone Numbers"] = re.findall(phone_pattern, text)
 
-    fax_pattern = r"(?i)\bFax(?:\s*number| no\.?)?\s*[:\-]?\s*(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"
+    # only lines that start with "Fax number:" (the provider label)
+    fax_pattern = r"(?im)^Fax\s+number\s*:\s*((?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})"
     results["Fax Numbers"] = re.findall(fax_pattern, text)
+
+
 
     email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
     results["Email Addresses"] = re.findall(email_pattern, text)
@@ -548,6 +551,20 @@ def process_gui_patient_info_with_full_text():
     anonymized_entire_text = re.sub(r"(?im)Name:\s*.*", "Name: [*name*]", original_full_text)
     anonymized_entire_text = re.sub(r"(?im)(?:Date\s+of\s+Birth|DOB)\s*:\s*.*",
     "Date of Birth: [*dob*]", anonymized_entire_text)
+    # anonymize the Date of Visit line
+    anonymized_entire_text = re.sub(r"(?im)Medical\s+record\s+number\s*:\s*.*", "Medical record number: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Code\s*:\s*.*", "Code: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Account\s*:\s*.*", "Account: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Fax\s+no.\s*:\s*.*", "Fax no.: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Social\s+Worker\s*:\s*.*", "", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)license\s+number\s*:\s*.*", "", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Certificate\s+number\s*:\s*.*", "", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Medicaid\s+Account\s*:\s*.*", "", anonymized_entire_text)
+
+    anonymized_entire_text = re.sub(r"(?im)Pacemaker\s+serial\s+numbers\s*:\s*.*", "Pacemaker serial numbers: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Device\s+identifier\s*:\s*.*", "Device identifier: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Health\s+plan\s+beneficiary\s+number\s*:\s*.*", "Health plan beneficiary number: [*Redacted*]", anonymized_entire_text)
+    anonymized_entire_text = re.sub(r"(?im)Date\s+of\s+Visit\s*:\s*.*", "Date of Visit: [*Date*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Address:\s*.*", "Address: [*address*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Phone:\s*.*", "Phone: [*phone*]", anonymized_entire_text)
     anonymized_entire_text = re.sub(r"(?im)Email:\s*.*", "Email: [*email*]", anonymized_entire_text)
