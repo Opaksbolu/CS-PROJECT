@@ -545,32 +545,39 @@ def process_gui_patient_info_with_full_text():
     text_box.config(state=tk.DISABLED)
     text_box.pack(fill=tk.X, expand=True, pady=(0, 5))
 
-    # 4) We want to let the user toggle the ENTIRE original text vs. an anonymized version
-    original_full_text = full_text  # The entire file text unmodified
-    # Build an anonymized version of the ENTIRE text:
-    anonymized_entire_text = re.sub(r"(?im)Name:\s*.*", "Name: [*name*]", original_full_text)
-    anonymized_entire_text = re.sub(r"(?im)(?:Date\s+of\s+Birth|DOB)\s*:\s*.*",
-    "Date of Birth: [*dob*]", anonymized_entire_text)
-    # anonymize the Date of Visit line
-    anonymized_entire_text = re.sub(r"(?im)Medical\s+record\s+number\s*:\s*.*", "Medical record number: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Code\s*:\s*.*", "Code: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Account\s*:\s*.*", "Account: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Fax\s+no.\s*:\s*.*", "Fax no.: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Social\s+Worker\s*:\s*.*", "", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)license\s+number\s*:\s*.*", "", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Certificate\s+number\s*:\s*.*", "", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Medicaid\s+Account\s*:\s*.*", "", anonymized_entire_text)
+    def anonymize_text(text):
+        patterns = [
+            (r"(?im)Name:\s*.*", "Name: [*name*]"),
+            (r"(?im)Patient:\s*.*", "Patient: [*patient*]"),
+            (r"(?im)Patient name:\s*.*", "Patient name: [*patient*]"),
+            (r"(?im)(?:Date\s+of\s+Birth|DOB)\s*:\s*.*", "Date of Birth: [*dob*]"),
+            (r"(?im)Date\s+of\s+Visit\s*:\s*.*", "Date of Visit: [*Date*]"),
+            (r"(?im)Medical\s+record\s+number\s*:\s*.*", "Medical record number: [*Redacted*]"),
+            (r"(?im)Code\s*:\s*.*", "Code: [*Redacted*]"),
+            (r"(?im)Account\s*:\s*.*", "Account: [*Redacted*]"),
+            (r"(?im)Fax\s*(no\.|number)\s*:\s*.*", "Fax number: [*Redacted*]"),
+            (r"(?im)Social\s+Worker\s*:\s*.*", "Social Worker: [*Redacted*]"),
+            (r"(?im)license\s+number\s*:\s*.*", "License number: [*Redacted*]"),
+            (r"(?im)Certificate\s+number\s*:\s*.*", "Certificate number: [*Redacted*]"),
+            (r"(?im)Medicaid\s+Account\s*:\s*.*", "Medicaid Account: [*Redacted*]"),
+            (r"(?im)Pacemaker\s+serial\s+numbers\s*:\s*.*", "Pacemaker serial numbers: [*Redacted*]"),
+            (r"(?im)Device\s+identifier\s*:\s*.*", "Device identifier: [*Redacted*]"),
+            (r"(?im)Health\s+plan\s+beneficiary\s+number\s*:\s*.*", "Health plan beneficiary number: [*Redacted*]"),
+            (r"(?im)Health\s+Insurance\s*:\s*.*", "Health Insurance: [*Redacted*]"),
+            (r"(?im)Group\s+no\.?\s*:\s*.*", "Group no.: [*Redacted*]"),
+            (r"(?im)Address:\s*.*", "Address: [*address*]"),
+            (r"(?im)Phone:\s*.*", "Phone: [*phone*]"),
+            (r"(?im)Email:\s*.*", "Email: [*email*]"),
+            (r"(?im)SSN:\s*.*", "SSN: [*ssn*]")
+        ]
+        
+        for pattern, replacement in patterns:
+            text = re.sub(pattern, replacement, text)
+        return text
 
-    anonymized_entire_text = re.sub(r"(?im)Pacemaker\s+serial\s+numbers\s*:\s*.*", "Pacemaker serial numbers: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Device\s+identifier\s*:\s*.*", "Device identifier: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Health\s+plan\s+beneficiary\s+number\s*:\s*.*", "Health plan beneficiary number: [*Redacted*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Date\s+of\s+Visit\s*:\s*.*", "Date of Visit: [*Date*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Address:\s*.*", "Address: [*address*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Phone:\s*.*", "Phone: [*phone*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)Email:\s*.*", "Email: [*email*]", anonymized_entire_text)
-    anonymized_entire_text = re.sub(r"(?im)SSN:\s*.*", "SSN: [*ssn*]", anonymized_entire_text)
-    # ... etc. for other patterns you want to anonymize ...
-
+    # Toggle-able text versions
+    original_full_text = full_text  # keep unmodified version
+    anonymized_entire_text = anonymize_text(original_full_text)
     is_showing_selected_fields = True
     is_deidentified = False
 
