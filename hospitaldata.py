@@ -568,7 +568,13 @@ def process_gui_patient_info_with_full_text():
             (r"(?im)Address:\s*.*", "Address: [*address*]"),
             (r"(?im)Phone:\s*.*", "Phone: [*phone*]"),
             (r"(?im)Email:\s*.*", "Email: [*email*]"),
-            (r"(?im)SSN:\s*.*", "SSN: [*ssn*]")
+            (r"(?im)SSN:\s*.*", "SSN: [*ssn*]"),
+            (r"(?im)^Allergies:\n(?:\s*[-•*].*\n|\s{2,}.*\n|.+\n)+", "Allergies:\n[*Redacted*]\n"),
+            (r"(?im)^Lab Results\s*\([^)]+\):\n(?:\s*[-•*].*\n|\s{2,}.*\n|.+\n)+", "Lab Results: [*Redacted*]\n"),
+            (r"(?im)^Allergies:\n(?:\s*\n)+(?:.+\n)+", "Allergies:\n[*Redacted*]\n"),
+            (r"(?im)^Lab Results\s*\([^)]+\):\n(?:\s*\n)+(?:.+\n)+", "Lab Results: [*Redacted*]\n"),
+            (r"(?im)^(?:CBC|ESR|CRP|Electrolytes|MRI Brain|Rheumatoid factor|Anti-CCP antibodies):.*", ""),
+            (r"(?im)^(?:NSAIDs.*|Latex)$", "")
         ]
         
         for pattern, replacement in patterns:
